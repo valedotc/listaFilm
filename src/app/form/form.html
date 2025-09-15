@@ -1,0 +1,270 @@
+<div class="container-fluid py-3">
+  <!-- Header del form -->
+  <div class="glass-card mb-4">
+    <div class="d-flex align-items-center">
+      <div>
+        <h1 class="text-white mb-1"><i class="bi bi-plus-circle"></i> Aggiungi Nuovo Film</h1>
+        <p class="text-white-50 mb-0">
+          Compila tutti i campi per aggiungere il film alla tua collezione
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form principale -->
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+      <form class="glass-card" (ngSubmit)="onSubmit()" #filmForm="ngForm" novalidate>
+        <!-- Titolo -->
+        <div class="mb-4">
+          <label for="titolo" class="form-label text-white fw-bold">
+            <i class="bi bi-film"></i> Titolo del Film *
+          </label>
+          <input
+            type="text"
+            class="form-control form-control-lg glass-input"
+            id="titolo"
+            name="titolo"
+            [(ngModel)]="film.titolo"
+            #titoloInput="ngModel"
+            required
+            maxlength="100"
+            placeholder="Inserisci il titolo del film..."
+            [class.is-invalid]="titoloInput.invalid && titoloInput.touched"
+            [class.is-valid]="titoloInput.valid && titoloInput.touched"
+          />
+
+          @if (titoloInput.invalid && titoloInput.touched) {
+          <div class="invalid-feedback">
+            <i class="bi bi-exclamation-circle"></i> Il titolo è obbligatorio
+          </div>
+          }
+
+          <div class="form-text text-white-50">{{ film.titolo.length }}/100 caratteri</div>
+        </div>
+
+        <!-- Data -->
+        <div class="mb-4">
+          <label for="data" class="form-label text-white fw-bold">
+            <i class="bi bi-calendar"></i> Data di Uscita *
+          </label>
+          <input
+            type="date"
+            class="form-control glass-input"
+            id="data"
+            name="data"
+            [(ngModel)]="dataString"
+            #dataInput="ngModel"
+            required
+            [max]="maxDate"
+            [class.is-invalid]="dataInput.invalid && dataInput.touched"
+            [class.is-valid]="dataInput.valid && dataInput.touched"
+          />
+
+          @if (dataInput.invalid && dataInput.touched) {
+          <div class="invalid-feedback">
+            <i class="bi bi-exclamation-circle"></i> Seleziona una data valida
+          </div>
+          }
+        </div>
+
+        <!-- Genere -->
+        <div class="mb-4">
+          <label for="genere" class="form-label text-white fw-bold">
+            <i class="bi bi-tags"></i> Genere *
+          </label>
+          <select
+            class="form-select glass-input"
+            id="genere"
+            name="genere"
+            [(ngModel)]="film.genere"
+            #genereInput="ngModel"
+            required
+            [class.is-invalid]="genereInput.invalid && genereInput.touched"
+            [class.is-valid]="genereInput.valid && genereInput.touched"
+          >
+            <option value="" disabled>Seleziona un genere...</option>
+            <option *ngFor="let genere of generiDisponibili" [value]="genere">
+              {{ genere }}
+            </option>
+          </select>
+
+          @if (genereInput.invalid && genereInput.touched) {
+          <div class="invalid-feedback">
+            <i class="bi bi-exclamation-circle"></i> Seleziona un genere
+          </div>
+          }
+        </div>
+
+        <!-- Valutazione -->
+        <div class="mb-4">
+          <label for="valutazione" class="form-label text-white fw-bold">
+            <i class="bi bi-star"></i> Valutazione *
+          </label>
+
+          <!-- Range slider con stelle -->
+          <div class="rating-container">
+            <input
+              type="range"
+              class="form-range rating-slider"
+              id="valutazione"
+              name="valutazione"
+              [(ngModel)]="film.valutazione"
+              #valutazioneInput="ngModel"
+              min="1"
+              max="10"
+              step="0.5"
+              required
+            />
+
+            <div class="rating-display d-flex align-items-center justify-content-between mt-2">
+              <div class="stars">
+                <i
+                  *ngFor="let star of getStars(); let i = index"
+                  class="bi"
+                  [class.bi-star-fill]="i < getFullStars()"
+                  [class.bi-star-half]="i === getFullStars() && hasHalfStar()"
+                  [class.bi-star]="i > getFullStars() || (i === getFullStars() && !hasHalfStar())"
+                  [class.text-warning]="
+                    i < getFullStars() || (i === getFullStars() && hasHalfStar())
+                  "
+                >
+                </i>
+              </div>
+              <span class="rating-value badge bg-warning text-dark fs-6">
+                {{ film.valutazione }}/10
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Immagine Drag & Drop -->
+        <div class="mb-4">
+          <label class="form-label text-white fw-bold">
+            <i class="bi bi-image"></i> Immagine del Film
+          </label>
+
+          <!-- Drag & drop zone -->
+          <div
+            class="image-drop-zone glass-input p-4"
+            (click)="fileInput.click()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            [class.drag-active]="isDragging"
+            [class.drag-over]="isDragging"
+          >
+            @if (!film.immagine) {
+            <div class="drop-zone-content text-center py-4">
+              <i class="bi bi-cloud-upload display-4 mb-3"></i>
+              <h5 class="text-white mb-2">Trascina qui l'immagine del film</h5>
+              <p class="text-white-50 mb-2">- oppure -</p>
+              <button type="button" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-folder2-open me-2"></i>Sfoglia File
+              </button>
+              <div class="small text-white-50 mt-3">
+                <i class="bi bi-info-circle me-1"></i>
+                Formati supportati: PNG, JPG, GIF (max 5MB)
+              </div>
+            </div>
+            } @else {
+            <div class="position-relative preview-container">
+              <img
+                [src]="film.immagine"
+                class="img-fluid preview-image rounded shadow"
+                [alt]="film.titolo || 'Anteprima'"
+              />
+              <div class="preview-overlay">
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2"
+                  (click)="removeImage($event)"
+                >
+                  <i class="bi bi-trash me-1"></i>Rimuovi
+                </button>
+              </div>
+            </div>
+            }
+
+            <!-- Overlay per il drag -->
+            @if (isDragging) {
+            <div class="drag-overlay">
+              <div class="text-center text-white">
+                <i class="bi bi-download display-4"></i>
+                <h4>Rilascia per caricare</h4>
+              </div>
+            </div>
+            }
+
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              style="display: none"
+              (change)="onFileSelected($event)"
+            />
+          </div>
+        </div>
+
+        <!-- Descrizione -->
+        <div class="mb-5">
+          <label for="descrizione" class="form-label text-white fw-bold">
+            <i class="bi bi-card-text"></i> Descrizione
+          </label>
+          <textarea
+            class="form-control glass-input"
+            id="descrizione"
+            name="descrizione"
+            [(ngModel)]="film.descrizione"
+            #descrizioneInput="ngModel"
+            rows="4"
+            maxlength="500"
+            placeholder="Descrivi la trama del film..."
+            [class.is-valid]="
+              descrizioneInput.valid && descrizioneInput.touched && film.descrizione.length > 0
+            "
+          >
+          </textarea>
+          <div class="form-text text-white-50">{{ film.descrizione.length }}/500 caratteri</div>
+        </div>
+
+        <!-- Pulsanti azione -->
+        <div class="d-flex gap-3 justify-content-end">
+          <button type="button" class="btn btn-warning" (click)="resetForm(filmForm)">
+            <i class="bi bi-arrow-clockwise"></i> Reset
+          </button>
+
+          <button type="button" class="btn btn-danger" [routerLink]="['/home']">
+            <i class="bi bi-x-circle"></i> Annulla
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-success btn-lg"
+            [disabled]="!filmForm.valid || isSubmitting"
+            [class.loading]="isSubmitting"
+          >
+            @if (!isSubmitting) {
+            <span> <i class="bi bi-check-circle"></i> Aggiungi Film </span>
+            } @else {
+            <span>
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Salvando...
+            </span>
+            }
+          </button>
+        </div>
+
+        <!-- Indicatore validazione form -->
+        @if (filmForm.submitted && filmForm.invalid) {
+        <div class="form-validation-indicator mt-3">
+          <div class="alert alert-danger glass-alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Attenzione!</strong> Correggi gli errori evidenziati prima di procedere.
+          </div>
+        </div>
+        }
+      </form>
+    </div>
+  </div>
+</div>

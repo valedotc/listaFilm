@@ -1,1 +1,259 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg-1: #044040;
+  --bg-2: #6b2630;
+  --bg-3: #8c1f28;
+  --accent: #d92525;
+  --glass: rgba(242, 242, 242, 0.06);
+  --glass-strong: rgba(242, 242, 242, 0.12);
+  --text-light: rgba(242, 242, 242, 0.95);
+  --shadow: rgba(0, 0, 0, 0.18);
+}
+
+/* Corpo: gradiente animato e layout base */
+body {
+  margin: 0;
+  padding-top: 90px;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-light);
+
+  /* Gradiente animato */
+  background: linear-gradient(120deg, var(--bg-1), var(--bg-2), var(--bg-3));
+  background-size: 200% 200%;
+  animation: gradientShift 14s ease-in-out infinite;
+  background-attachment: fixed;
+}
+
+/* sfondo overlay sottile e lento movimento */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 20% 80%, rgba(140, 31, 40, 0.18) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(4, 64, 64, 0.12) 0%, transparent 45%);
+  opacity: 0.9;
+  filter: blur(20px);
+  transform: translateZ(0);
+  animation: overlayFloat 18s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes overlayFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.95;
+  }
+}
+
+/* Navbar pulita ed elegante */
+.navbar {
+  padding: 0.9rem 1.5rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: linear-gradient(145deg, rgba(140, 31, 40, 0.92), rgba(89, 28, 33, 0.92));
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+/* leggero glass sopra la navbar */
+.navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  pointer-events: none;
+}
+
+/* link e brand */
+.navbar-nav .nav-link {
+  color: var(--text-light);
+  font-weight: 500;
+  transition: color 0.18s ease;
+}
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+  color: var(--accent);
+}
+
+.navbar-brand {
+  padding: 0;
+  margin-right: auto;
+  position: relative;
+}
+.navbar-brand img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.2, 1), filter 0.35s;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.25));
+}
+.navbar-brand img:hover {
+  transform: scale(1.06) rotate(3deg);
+}
+
+/* Pulsante principale elegante */
+.btn-outline-success {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.5rem 1.05rem;
+  border: none;
+  border-radius: 999px;
+  min-width: 52px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: linear-gradient(145deg, var(--accent), #8c1f28);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 8px 24px rgba(217, 37, 37, 0.22), inset 0 1px 0 var(--glass-strong);
+}
+.btn-outline-success::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  left: -120%;
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 80%
+  );
+  transform: skewX(-12deg);
+  transition: left 0.5s ease;
+}
+.btn-outline-success:hover::before {
+  left: 120%;
+}
+.btn-outline-success:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(217, 37, 37, 0.26);
+}
+.btn-outline-success:active {
+  transform: translateY(-1px) scale(0.995);
+}
+.btn-outline-success:focus {
+  box-shadow: 0 0 0 0.24rem rgba(217, 37, 37, 0.12);
+}
+
+/* Contenuti principali */
+router-outlet + * {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card glassmorphism più sobrio */
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 1.6rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 1.6rem;
+}
+
+/* Layout navbar */
+.navbar .container-fluid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Variante logo centrato */
+.navbar.center-logo .navbar-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.navbar.center-logo .btn-outline-success {
+  margin-left: auto;
+}
+
+/* Accessibilità focus */
+.navbar-brand:focus-visible,
+.btn-outline-success:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.18);
+  outline-offset: 3px;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(145deg, #8c1f28, #044040);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(145deg, #044040, #8c1f28);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding-top: 80px;
+  }
+  .navbar {
+    padding: 0.7rem 1rem;
+  }
+  .navbar-brand img {
+    width: 50px;
+    height: 50px;
+  }
+  .btn-outline-success {
+    font-size: 1.4rem;
+    padding: 0.45rem 0.95rem;
+    min-width: 48px;
+  }
+}
+@media (max-width: 576px) {
+  body {
+    padding-top: 74px;
+  }
+  .navbar {
+    padding: 0.6rem 0.8rem;
+  }
+  .navbar-brand img {
+    width: 44px;
+    height: 44px;
+  }
+  .btn-outline-success {
+    font-size: 1.3rem;
+    padding: 0.38rem 0.85rem;
+    min-width: 46px;
+  }
+}

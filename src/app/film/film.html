@@ -1,0 +1,109 @@
+<!-- Card film principale -->
+<div class="film-component-card h-100">
+  <!-- Header con immagine -->
+  <div class="film-header">
+    <!-- Immagine del film -->
+    <div class="film-image-container">
+      <img
+        [src]="film().immagine || '/placeholder-film.jpg'"
+        [alt]="film().titolo"
+        class="film-image"
+        (error)="onImageError($event)"
+        loading="lazy"
+      />
+
+      <!-- Overlay gradiente -->
+      <div class="image-overlay"></div>
+
+      <!-- Badge genere -->
+      <div class="genre-badge">
+        <span class="badge">{{ film().genere }}</span>
+      </div>
+
+      <!-- Valutazione stellare -->
+      <div class="rating-overlay">
+        <div class="stars-container">
+          <div class="stars-display">
+            <i
+              *ngFor="let star of getStarsArray(); let i = index"
+              class="bi star-icon"
+              [class.bi-star-fill]="i < getFullStars()"
+              [class.bi-star-half]="i === getFullStars() && hasHalfStar()"
+              [class.bi-star]="i > getFullStars() || (i === getFullStars() && !hasHalfStar())"
+            >
+            </i>
+          </div>
+          <span class="rating-number">{{ film().valutazione }}/10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenuto film -->
+  <div class="film-content">
+    <!-- Titolo e data -->
+    <div class="film-title-section">
+      <h3 class="film-title">{{ film().titolo }}</h3>
+      <p class="film-date">
+        <i class="bi bi-calendar3"></i>
+        {{ formatDate(film().data) }}
+      </p>
+    </div>
+
+    <!-- Descrizione -->
+    @if (film().descrizione) {
+    <div class="film-description">
+      <p
+        class="description-text"
+        [class.expanded]="isDescriptionExpanded"
+        [title]="film().descrizione"
+      >
+        {{ getDescriptionPreview() }}
+      </p>
+
+      <!-- Pulsante espandi/comprimi descrizione -->
+      @if (film().descrizione.length > 100) {
+      <button class="btn btn-link btn-sm expand-btn p-0" (click)="toggleDescription($event)">
+        <i
+          class="bi"
+          [class.bi-chevron-down]="!isDescriptionExpanded"
+          [class.bi-chevron-up]="isDescriptionExpanded"
+        ></i>
+        {{ isDescriptionExpanded ? 'Riduci' : 'Espandi' }}
+      </button>
+      }
+    </div>
+    }
+
+    <!-- Statistiche film -->
+    <div class="film-stats">
+      <div class="stat-item">
+        <i class="bi bi-star-fill text-warning"></i>
+        <span>{{ film().valutazione }}/10</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-calendar3 text-info"></i>
+        <span>{{ film().data | date : 'yyyy' }}</span>
+      </div>
+      <div class="stat-item">
+        <i class="bi bi-tag text-secondary"></i>
+        <span>{{ film().genere }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer con azioni -->
+  <div class="film-footer">
+    <div class="film-actions">
+      <!-- Pulsante modifica -->
+      <button
+        class="btn btn-outline-warning btn-sm action-btn"
+        title="Modifica film"
+        (click)="onEditClick($event)"
+      >
+        <i class="bi bi-pencil"></i>
+        <span class="d-none d-sm-inline ms-1">Modifica</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+/* Stili per le card film */
+.film-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.film-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), 0 4px 15px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.film-card.selected {
+  border-color: #28a745;
+  box-shadow: 0 0 20px rgba(40, 167, 69, 0.3), 0 8px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px) scale(1.02);
+}
+
+/* Checkbox selezione */
+.selection-checkbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  padding: 5px;
+  backdrop-filter: blur(10px);
+}
+
+.selection-checkbox .form-check-input {
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  background-color: transparent;
+}
+
+.selection-checkbox .form-check-input:checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+/* Badge valutazione */
+.rating-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+/* Overlay selezione */
+.selection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(40, 167, 69, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsività */
+@media (max-width: 768px) {
+  .film-card {
+    margin-bottom: 1rem;
+  }
+
+  .glass-card .d-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .glass-card .d-flex > div {
+    margin-bottom: 1rem;
+  }
+
+  .glass-card .d-flex > div:last-child {
+    margin-bottom: 0;
+  }
+}

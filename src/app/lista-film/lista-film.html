@@ -1,0 +1,135 @@
+<div class="container-fluid py-3">
+  <div class="glass-card mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+      <div>
+        <h1 class="text-white mb-1">I Miei Film</h1>
+        <p class="text-white-50 mb-0">
+          {{ films().length }} film totali @if (hasSelectedFilms()) {
+          <span> - {{ selectedCount() }} selezionati</span>
+          }
+        </p>
+      </div>
+
+      <div class="d-flex gap-2 mt-2 mt-md-0">
+        <!-- Pulsante seleziona tutti -->
+        @if (!isEmpty()) {
+        <button
+          type="button"
+          class="btn btn-outline-light btn-sm"
+          [disabled]="films().length === 0"
+          (click)="isAllSelected() ? clearSelection() : selectAll()"
+        >
+          <i
+            class="bi"
+            [class.bi-check-square]="isAllSelected()"
+            [class.bi-square]="!isAllSelected()"
+          ></i>
+          {{ isAllSelected() ? 'Deseleziona tutto' : 'Seleziona tutto' }}
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra azioni per selezione multipla -->
+  @if (hasSelectedFilms()) {
+  <div class="glass-card mb-4 bg-danger bg-opacity-20">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="text-white">
+        <i class="bi bi-check-circle-fill text-success"></i>
+        {{ selectedCount() }} film selezionati
+      </div>
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-light btn-sm" (click)="clearSelection()">
+          <i class="bi bi-x-circle"></i>
+          Annulla selezione
+        </button>
+
+        <button class="btn btn-danger btn-sm" (click)="deleteSelectedFilms()">
+          <i class="bi bi-trash3"></i>
+          Elimina selezionati
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Messaggio vuoto -->
+  @if (isEmpty()) {
+  <div class="glass-card text-center py-5">
+    <i class="bi bi-film display-1 text-white-50"></i>
+    <h3 class="text-white mt-3">Nessun film nella lista</h3>
+    <p class="text-white-50">Inizia aggiungendo il tuo primo film!</p>
+    <button type="button" class="btn btn-outline-success ms-3" [routerLink]="['/add']">
+      + Aggiungi Film
+    </button>
+  </div>
+  }
+
+  <!-- Griglia film -->
+  @if (films().length > 0) {
+  <div class="row g-4">
+    <div
+      class="col-12 col-sm-6 col-md-4 col-lg-3"
+      *ngFor="let filmData of films(); trackBy: trackByFilmId"
+    >
+      <!-- Card film con selezione -->
+      <div
+        class="film-card position-relative"
+        [class.selected]="isSelected(filmData.id)"
+        (click)="toggleSelection(filmData.id)"
+      >
+        <!-- Checkbox selezione -->
+        <div>
+          <input
+            type="checkbox"
+            class="visually-hidden"
+            [checked]="isSelected(filmData.id)"
+            (change)="toggleSelection(filmData.id)"
+            aria-label="Seleziona film"
+          />
+        </div>
+
+        <!-- Badge valutazione -->
+        <div class="rating-badge">
+          <span class="badge bg-warning text-dark">
+            <i class="bi bi-star-fill"></i> {{ filmData.valutazione }}/10
+          </span>
+        </div>
+
+        <app-film [film]="filmData" [selected]="isSelected(filmData.id)"> </app-film>
+
+        <!-- Overlay selezione -->
+        <div class="selection-overlay" *ngIf="isSelected(filmData.id)">
+          <i class="bi bi-check-circle-fill text-success fs-2"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Footer con statistiche -->
+  @if (films().length > 0) {
+  <div class="glass-card mt-4">
+    <div class="row text-center">
+      <div class="col-6 col-md-3">
+        <div class="text-white-50">Totale Film</div>
+        <div class="h4 text-white">{{ films().length }}</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="text-white-50">Selezionati</div>
+        <div class="h4 text-white">{{ selectedCount() }}</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="text-white-50">Valutazione Media</div>
+        <div class="h4 text-white">{{ getAverageRating() | number : '1.1-1' }}/10</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="text-white-50">Genere Popolare</div>
+        <div class="h4 text-white">{{ getMostPopularGenre() }}</div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
