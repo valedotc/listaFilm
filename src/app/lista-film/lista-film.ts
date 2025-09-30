@@ -1,10 +1,11 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { Film, FilmInterface, Generi } from '../film/film';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, provideRouter } from '@angular/router';
 
 import { routes } from '../app.routes';
+import { FilmService } from '../film-service';
 
 @Component({
   selector: 'app-lista-film',
@@ -12,8 +13,10 @@ import { routes } from '../app.routes';
   templateUrl: './lista-film.html',
   styleUrl: './lista-film.css',
 })
-export class ListaFilm implements OnInit {
-  protected films = signal<FilmInterface[]>([]);
+export class ListaFilm {
+  private filmService = inject(FilmService);
+
+  protected films = this.filmService.films;
 
   readonly selectedIds = signal<Set<string>>(new Set());
   readonly selectedFilms = computed(() =>
@@ -24,45 +27,21 @@ export class ListaFilm implements OnInit {
   readonly selectedCount = computed(() => this.selectedIds().size);
   readonly isAllSelected = computed(() => this.selectedIds().size === this.films().length);
 
-  ngOnInit(): void {
-    this.loadFilmsFromStorage();
-  }
-
-  // ✅ CORRETTO - Carica direttamente FilmInterface
-  private loadFilmsFromStorage(): void {
-    const savedFilms = JSON.parse(localStorage.getItem('films') || '[]') as FilmInterface[];
-    // Converti le date da string a Date
-    const filmsWithDates = savedFilms.map((film) => ({
-      ...film,
-      data: new Date(film.data),
-    }));
-    this.films.set(filmsWithDates);
-  }
-
-  addFilmFromForm(filmData: FilmInterface): void {
-    this.films.update((currentFilms) => [...currentFilms, filmData]);
-    // Salva anche nel localStorage
-    this.saveToStorage();
+  addFilm(filmData: FilmInterface): void {
+    this.filmService.addFilm(filmData);
   }
 
   removeFilm(filmId: string): void {
-    this.films.update((currentFilms) => currentFilms.filter((f) => f.id !== filmId));
+    this.filmService.removeFilm(filmId);
     this.deselectFilm(filmId);
-    this.saveToStorage();
   }
 
   deleteSelectedFilms(): void {
-    const selectedIds = this.selectedIds();
-    this.films.update((currentFilms) => currentFilms.filter((film) => !selectedIds.has(film.id)));
+    const selectedIds = Array.from(this.selectedIds());
+    this.filmService.removeFilms(selectedIds);
     this.clearSelection();
-    this.saveToStorage();
   }
 
-  private saveToStorage(): void {
-    localStorage.setItem('films', JSON.stringify(this.films()));
-  }
-
-  // Altri metodi rimangono uguali ma con film.id invece di film.film().id
   trackByFilmId(index: number, film: FilmInterface): string {
     return film.id;
   }
@@ -91,7 +70,6 @@ export class ListaFilm implements OnInit {
     this.selectedIds.set(new Set(allIds));
   }
 
-  // Altri metodi rimangono uguali...
   clearSelection(): void {
     this.selectedIds.set(new Set());
   }
@@ -123,7 +101,4 @@ export class ListaFilm implements OnInit {
   isEmpty(): boolean {
     return this.films().length === 0;
   }
-
-  private searchTerm = signal<string>('');
-  private searchTimeout?: ReturnType<typeof setTimeout>;
 }

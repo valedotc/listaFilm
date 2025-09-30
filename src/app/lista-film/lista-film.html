@@ -94,13 +94,12 @@
         <!-- Badge valutazione -->
         <div class="rating-badge">
           <span class="badge bg-warning text-dark">
-            <i class="bi bi-star-fill"></i> {{ filmData.valutazione }}/10
+            <i class="bi bi-star-fill"></i> {{ filmData.valutazione }}/5
           </span>
         </div>
 
         <app-film [film]="filmData" [selected]="isSelected(filmData.id)"> </app-film>
 
-        <!-- Overlay selezione -->
         <div class="selection-overlay" *ngIf="isSelected(filmData.id)">
           <i class="bi bi-check-circle-fill text-success fs-2"></i>
         </div>
@@ -123,7 +122,7 @@
       </div>
       <div class="col-6 col-md-3">
         <div class="text-white-50">Valutazione Media</div>
-        <div class="h4 text-white">{{ getAverageRating() | number : '1.1-1' }}/10</div>
+        <div class="h4 text-white">{{ getAverageRating() | number : '1.1-1' }}/5</div>
       </div>
       <div class="col-6 col-md-3">
         <div class="text-white-50">Genere Popolare</div>
