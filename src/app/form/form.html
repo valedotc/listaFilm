@@ -14,7 +14,7 @@
   <!-- Form principale -->
   <div class="row justify-content-center">
     <div class="col-12 col-lg-8 col-xl-6">
-      <form class="glass-card" [formGroup]="filmForm" (ngSubmit)="onSubmit()" novalidate>
+      <form class="glass-card" [formGroup]="filmForm" (ngSubmit)="onSubmit()">
         <!-- Titolo -->
         <div class="mb-4">
           <label for="titolo" class="form-label text-white fw-bold">
@@ -31,19 +31,16 @@
             [formControlName]="'titolo'"
           />
 
-          <!-- @if (titolo.invalid && titolo.touched) {
+          @if (filmForm.controls.titolo.invalid && filmForm.controls.titolo.touched) {
           <div class="invalid-feedback">
             <i class="bi bi-exclamation-circle"></i> Il titolo è obbligatorio
           </div>
           }
-          -->
 
           <div class="form-text text-white-50">
             {{ filmForm.value.titolo?.length }}/100 caratteri
           </div>
         </div>
-
-        <div>{{ filmForm.value | json }}</div>
 
         <!-- Data -->
         <div class="mb-4">
@@ -60,11 +57,11 @@
             formControlName="data"
           />
 
-          <!--@if (dataInput.invalid && dataInput.touched) {
+          @if (filmForm.controls.data.errors) {
           <div class="invalid-feedback">
             <i class="bi bi-exclamation-circle"></i> Seleziona una data valida
           </div>
-          }-->
+          }
         </div>
 
         <!-- Genere -->
@@ -245,7 +242,7 @@
           </button>
         </div>
 
-        @if (filmForm.invalid) {
+        @if (filmForm.invalid && filmForm.touched) {
         <div class="form-validation-indicator mt-3">
           <div class="alert alert-danger glass-alert">
             <i class="bi bi-exclamation-triangle"></i>
