@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { Film, FilmInterface, Generi } from '../film/film';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
