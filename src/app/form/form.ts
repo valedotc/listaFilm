@@ -33,7 +33,7 @@ export class Form {
   filmForm = new FormGroup({
     id: new FormControl<string | null>(null),
     titolo: new FormControl<string | null>(null, Validators.required),
-    data: new FormControl<Date | null>(null, Validators.required),
+    data: new FormControl<string | null>(null, Validators.required),
     descrizione: new FormControl<string | null>(null),
     immagine: new FormControl<string | null>(null),
     valutazione: new FormControl<number | null>(5),
