@@ -37,7 +37,7 @@ export class Form {
     descrizione: new FormControl<string | null>(null),
     immagine: new FormControl<string | null>(null),
     valutazione: new FormControl<number | null>(5),
-    genere: new FormControl<Generi | null>(null),
+    genere: new FormControl<Generi | null>(null, Validators.required),
   });
 
   getStars(): number[] {
