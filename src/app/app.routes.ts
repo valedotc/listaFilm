@@ -16,4 +16,9 @@ export const routes: Routes = [
     path: 'add',
     component: Form,
   },
+  {
+    path: 'edit/:id',
+    component: Form,
+  },
+  { path: '**', redirectTo: 'home' },
 ];

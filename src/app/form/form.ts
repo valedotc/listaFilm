@@ -1,6 +1,6 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
 import { Generi, FilmInterface } from '../film/film';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   FormControl,
   FormsModule,
@@ -8,36 +8,76 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FilmService } from '../film-service';
 
 @Component({
   selector: 'app-form',
-  imports: [CommonModule, FormsModule, RouterLink, ReactiveFormsModule, JsonPipe],
+  imports: [CommonModule, FormsModule, RouterLink, ReactiveFormsModule],
   templateUrl: './form.html',
   styleUrl: './form.css',
 })
-export class Form {
+export class Form implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private filmService = inject(FilmService);
 
   isDragging = false;
   fileSelected = false;
-
   isSubmitting = false;
   maxDate = new Date().toISOString().split('T')[0];
+
+  isEditMode = false;
+  filmId: number | null = null;
 
   generiDisponibili = Object.values(Generi);
 
   filmForm = new FormGroup({
-    id: new FormControl<string | null>(null),
     titolo: new FormControl<string | null>(null, Validators.required),
-    data: new FormControl<string | null>(null, Validators.required),
+    data: new FormControl<Date | null>(null, Validators.required),
     descrizione: new FormControl<string | null>(null),
     immagine: new FormControl<string | null>(null),
     valutazione: new FormControl<number | null>(5),
     genere: new FormControl<Generi | null>(null, Validators.required),
   });
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      const idStr = params.get('id');
+
+      if (idStr !== null) {
+        this.isEditMode = true;
+        this.filmId = +idStr;
+        this.loadFilmData(this.filmId);
+      } else {
+        this.isEditMode = false;
+        this.filmId = null;
+        this.resetForm(this.filmForm);
+      }
+    });
+  }
+
+  private loadFilmData(id: number): void {
+    const film = this.filmService.getFilmById(id);
+
+    if (film) {
+      this.filmForm.patchValue({
+        titolo: film.titolo,
+        data: film.data,
+        descrizione: film.descrizione,
+        immagine: film.immagine,
+        valutazione: film.valutazione,
+        genere: film.genere,
+      });
+
+      if (film.immagine) {
+        this.fileSelected = true;
+      }
+    } else {
+      console.error('Film non trovato');
+      this.router.navigate(['/']);
+    }
+  }
 
   getStars(): number[] {
     return Array(5)
@@ -55,9 +95,13 @@ export class Form {
     this.isSubmitting = true;
 
     try {
-      this.saveFilm(this.filmForm.value as FilmInterface);
-
-      console.log('Film salvato:', this.filmForm.value);
+      if (this.isEditMode && this.filmId !== null) {
+        this.updateFilm(this.filmForm.value as FilmInterface);
+        console.log('Film aggiornato:', this.filmForm.value);
+      } else {
+        this.saveFilm(this.filmForm.value as FilmInterface);
+        console.log('Film salvato:', this.filmForm.value);
+      }
 
       await this.router.navigate(['/']);
     } catch (error) {
@@ -69,13 +113,18 @@ export class Form {
 
   resetForm(form: FormGroup): void {
     form.reset();
-    this.filmForm.reset();
-    this.dataString = '';
+    this.filmForm.reset({ valutazione: 5 }); // Reset con valore default
     this.fileSelected = false;
   }
 
   private saveFilm(film: FilmInterface): void {
     this.filmService.addFilm(film);
+  }
+
+  private updateFilm(film: FilmInterface): void {
+    if (this.filmId !== null) {
+      this.filmService.updateFilm(this.filmId, film);
+    }
   }
 
   @HostListener('dragover', ['$event'])
@@ -111,21 +160,20 @@ export class Form {
   }
 
   private processFile(file: File): void {
-    // Validation
-    const maxSize = 25 * 1024 * 1024; // 25 MB
+    const maxSize = 25 * 1024 * 1024;
     if (!file.type.startsWith('image/')) {
       alert('Per favore seleziona un file immagine');
       return;
     }
     if (file.size > maxSize) {
-      alert("L'immagine non può superare i 5MB");
+      alert("L'immagine non può superare i 25MB");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      // this.filmForm.value.immagine = reader.result as string;
       this.filmForm.controls.immagine.setValue(reader.result as string);
+      this.fileSelected = true;
     };
     reader.onerror = () => {
       alert("Errore nel caricamento dell'immagine");
@@ -136,5 +184,6 @@ export class Form {
   removeImage(event: Event): void {
     event.stopPropagation();
     this.filmForm.controls.immagine.setValue('');
+    this.fileSelected = false;
   }
 }

@@ -2,9 +2,8 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { Film, FilmInterface, Generi } from '../film/film';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, provideRouter } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
-import { routes } from '../app.routes';
 import { FilmService } from '../film-service';
 
 @Component({

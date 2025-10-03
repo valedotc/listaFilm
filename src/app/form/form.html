@@ -3,9 +3,16 @@
   <div class="glass-card mb-4">
     <div class="d-flex align-items-center">
       <div>
-        <h1 class="text-white mb-1"><i class="bi bi-plus-circle"></i> Aggiungi Nuovo Film</h1>
+        <h1 class="text-white mb-1">
+          <i [class]="isEditMode ? 'bi bi-pencil-square' : 'bi bi-plus-circle'"></i>
+          {{ isEditMode ? 'Modifica Film' : 'Aggiungi Nuovo Film' }}
+        </h1>
         <p class="text-white-50 mb-0">
-          Compila tutti i campi per aggiungere il film alla tua collezione
+          {{
+            isEditMode
+              ? 'Aggiorna i dettagli del film'
+              : 'Compila tutti i campi per aggiungere il film alla tua collezione'
+          }}
         </p>
       </div>
     </div>
@@ -32,13 +39,13 @@
           />
 
           @if (filmForm.controls.titolo.invalid && filmForm.controls.titolo.touched) {
-          <div class="invalid-feedback">
+          <div class="invalid-feedback d-block">
             <i class="bi bi-exclamation-circle"></i> Il titolo è obbligatorio
           </div>
           }
 
           <div class="form-text text-white-50">
-            {{ filmForm.value.titolo?.length }}/100 caratteri
+            {{ filmForm.value.titolo?.length || 0 }}/100 caratteri
           </div>
         </div>
 
@@ -57,8 +64,8 @@
             formControlName="data"
           />
 
-          @if (filmForm.controls.data.errors) {
-          <div class="invalid-feedback">
+          @if (filmForm.controls.data.invalid && filmForm.controls.data.touched) {
+          <div class="invalid-feedback d-block">
             <i class="bi bi-exclamation-circle"></i> Seleziona una data valida
           </div>
           }
@@ -70,17 +77,17 @@
             <i class="bi bi-tags"></i> Genere *
           </label>
           <select class="form-select glass-input" id="genere" formControlName="genere" required>
-            <option value="" disabled>Seleziona un genere...</option>
-            @for (genereValue of generiDisponibili; track $index) {
+            <option [value]="null" disabled>Seleziona un genere...</option>
+            @for (genereValue of generiDisponibili; track genereValue) {
             <option [value]="genereValue">{{ genereValue }}</option>
             }
           </select>
 
-          <!--@if (genereInput.invalid && genereInput.touched) {
-          <div class="invalid-feedback">
+          @if (filmForm.controls.genere.invalid && filmForm.controls.genere.touched) {
+          <div class="invalid-feedback d-block">
             <i class="bi bi-exclamation-circle"></i> Seleziona un genere
           </div>
-        }-->
+          }
         </div>
 
         <!-- Valutazione -->
@@ -105,17 +112,17 @@
 
             <div class="rating-display d-flex align-items-center justify-content-between mt-2">
               <div class="stars">
-                @for (star of getStars(); track $index) {
+                @for (star of getStars(); track star) {
                 <i
                   class="bi"
-                  [class.bi-star-fill]="(filmForm.value.valutazione || 0) >= $index + 1"
+                  [class.bi-star-fill]="(filmForm.value.valutazione || 0) >= star + 1"
                   [class.bi-star-half]="
-                    (filmForm.value.valutazione || 0) >= $index + 0.5 &&
-                    (filmForm.value.valutazione || 0) < $index + 1
+                    (filmForm.value.valutazione || 0) >= star + 0.5 &&
+                    (filmForm.value.valutazione || 0) < star + 1
                   "
-                  [class.bi-star]="(filmForm.value.valutazione || 0) < $index + 0.5"
-                  [class.text-warning]="(filmForm.value.valutazione || 0) >= $index + 0.5"
-                  [class.text-white-50]="(filmForm.value.valutazione || 0) < $index + 0.5"
+                  [class.bi-star]="(filmForm.value.valutazione || 0) < star + 0.5"
+                  [class.text-warning]="(filmForm.value.valutazione || 0) >= star + 0.5"
+                  [class.text-white-50]="(filmForm.value.valutazione || 0) < star + 0.5"
                 >
                 </i>
                 }
@@ -153,7 +160,7 @@
               </button>
               <div class="small text-white-50 mt-3">
                 <i class="bi bi-info-circle me-1"></i>
-                Formati supportati: PNG, JPG, GIF (max 5MB)
+                Formati supportati: PNG, JPG, GIF (max 25MB)
               </div>
             </div>
             } @else {
@@ -207,11 +214,11 @@
             rows="4"
             maxlength="500"
             placeholder="Descrivi la trama del film..."
-            [formControlName]="'descrizione'"
+            formControlName="descrizione"
           >
           </textarea>
           <div class="form-text text-white-50">
-            {{ filmForm.value.descrizione?.length }}/500 caratteri
+            {{ filmForm.value.descrizione?.length || 0 }}/500 caratteri
           </div>
         </div>
 
@@ -232,11 +239,14 @@
             [class.loading]="isSubmitting"
           >
             @if (!isSubmitting) {
-            <span> <i class="bi bi-check-circle"></i> Aggiungi Film </span>
+            <span>
+              <i [class]="isEditMode ? 'bi bi-check-circle' : 'bi bi-plus-circle'"></i>
+              {{ isEditMode ? 'Aggiorna Film' : 'Aggiungi Film' }}
+            </span>
             } @else {
             <span>
               <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-              Salvando...
+              {{ isEditMode ? 'Aggiornando...' : 'Salvando...' }}
             </span>
             }
           </button>

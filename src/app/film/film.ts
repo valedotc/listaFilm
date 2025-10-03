@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-film',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './film.html',
   styleUrl: './film.css',
 })
@@ -14,19 +15,10 @@ export class Film {
   selectedChange = output<boolean>();
 
   isDescriptionExpanded = false;
+  Math = Math;
 
   getStarsArray(): number[] {
-    return Array(5)
-      .fill(0)
-      .map((_, i) => i);
-  }
-
-  getFullStars(): number {
-    return Math.floor(this.film().valutazione / 2);
-  }
-
-  hasHalfStar(): boolean {
-    return this.film().valutazione % 2 !== 0;
+    return [0, 1, 2, 3, 4];
   }
 
   formatDate(date: Date): string {
