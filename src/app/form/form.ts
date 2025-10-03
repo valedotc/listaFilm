@@ -24,7 +24,6 @@ export class Form {
   isDragging = false;
   fileSelected = false;
 
-  dataString = '';
   isSubmitting = false;
   maxDate = new Date().toISOString().split('T')[0];
 
