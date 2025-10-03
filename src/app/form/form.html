@@ -14,7 +14,7 @@
   <!-- Form principale -->
   <div class="row justify-content-center">
     <div class="col-12 col-lg-8 col-xl-6">
-      <form class="glass-card" (ngSubmit)="onSubmit()" #filmForm="ngForm" novalidate>
+      <form class="glass-card" [formGroup]="filmForm" (ngSubmit)="onSubmit()" novalidate>
         <!-- Titolo -->
         <div class="mb-4">
           <label for="titolo" class="form-label text-white fw-bold">
@@ -25,22 +25,21 @@
             class="form-control form-control-lg glass-input"
             id="titolo"
             name="titolo"
-            [(ngModel)]="film.titolo"
-            #titoloInput="ngModel"
             required
             maxlength="100"
             placeholder="Inserisci il titolo del film..."
-            [class.is-invalid]="titoloInput.invalid && titoloInput.touched"
-            [class.is-valid]="titoloInput.valid && titoloInput.touched"
+            formControlName="titolo"
           />
 
-          @if (titoloInput.invalid && titoloInput.touched) {
+          @if (filmForm.controls.titolo.invalid && filmForm.controls.titolo.touched) {
           <div class="invalid-feedback">
             <i class="bi bi-exclamation-circle"></i> Il titolo è obbligatorio
           </div>
           }
 
-          <div class="form-text text-white-50">{{ film.titolo.length }}/100 caratteri</div>
+          <div class="form-text text-white-50">
+            {{ filmForm.value.titolo?.length }}/100 caratteri
+          </div>
         </div>
 
         <!-- Data -->
@@ -53,15 +52,12 @@
             class="form-control glass-input"
             id="data"
             name="data"
-            [(ngModel)]="dataString"
-            #dataInput="ngModel"
             required
             [max]="maxDate"
-            [class.is-invalid]="dataInput.invalid && dataInput.touched"
-            [class.is-valid]="dataInput.valid && dataInput.touched"
+            formControlName="data"
           />
 
-          @if (dataInput.invalid && dataInput.touched) {
+          @if (filmForm.controls.data.errors) {
           <div class="invalid-feedback">
             <i class="bi bi-exclamation-circle"></i> Seleziona una data valida
           </div>
@@ -73,27 +69,18 @@
           <label for="genere" class="form-label text-white fw-bold">
             <i class="bi bi-tags"></i> Genere *
           </label>
-          <select
-            class="form-select glass-input"
-            id="genere"
-            name="genere"
-            [(ngModel)]="film.genere"
-            #genereInput="ngModel"
-            required
-            [class.is-invalid]="genereInput.invalid && genereInput.touched"
-            [class.is-valid]="genereInput.valid && genereInput.touched"
-          >
+          <select class="form-select glass-input" id="genere" formControlName="genere" required>
             <option value="" disabled>Seleziona un genere...</option>
-            <option *ngFor="let genere of generiDisponibili" [value]="genere">
-              {{ genere }}
-            </option>
+            @for (genereValue of generiDisponibili; track $index) {
+            <option [value]="genereValue">{{ genereValue }}</option>
+            }
           </select>
 
-          @if (genereInput.invalid && genereInput.touched) {
+          <!--@if (genereInput.invalid && genereInput.touched) {
           <div class="invalid-feedback">
             <i class="bi bi-exclamation-circle"></i> Seleziona un genere
           </div>
-          }
+        }-->
         </div>
 
         <!-- Valutazione -->
@@ -109,30 +96,32 @@
               class="form-range rating-slider"
               id="valutazione"
               name="valutazione"
-              [(ngModel)]="film.valutazione"
-              #valutazioneInput="ngModel"
               min="1"
-              max="10"
+              max="5"
               step="0.5"
               required
+              formControlName="valutazione"
             />
 
             <div class="rating-display d-flex align-items-center justify-content-between mt-2">
               <div class="stars">
+                @for (star of getStars(); track $index) {
                 <i
-                  *ngFor="let star of getStars(); let i = index"
                   class="bi"
-                  [class.bi-star-fill]="i < getFullStars()"
-                  [class.bi-star-half]="i === getFullStars() && hasHalfStar()"
-                  [class.bi-star]="i > getFullStars() || (i === getFullStars() && !hasHalfStar())"
-                  [class.text-warning]="
-                    i < getFullStars() || (i === getFullStars() && hasHalfStar())
+                  [class.bi-star-fill]="(filmForm.value.valutazione || 0) >= $index + 1"
+                  [class.bi-star-half]="
+                    (filmForm.value.valutazione || 0) >= $index + 0.5 &&
+                    (filmForm.value.valutazione || 0) < $index + 1
                   "
+                  [class.bi-star]="(filmForm.value.valutazione || 0) < $index + 0.5"
+                  [class.text-warning]="(filmForm.value.valutazione || 0) >= $index + 0.5"
+                  [class.text-white-50]="(filmForm.value.valutazione || 0) < $index + 0.5"
                 >
                 </i>
+                }
               </div>
               <span class="rating-value badge bg-warning text-dark fs-6">
-                {{ film.valutazione }}/10
+                {{ filmForm.value.valutazione || 0 }}/5
               </span>
             </div>
           </div>
@@ -154,7 +143,7 @@
             [class.drag-active]="isDragging"
             [class.drag-over]="isDragging"
           >
-            @if (!film.immagine) {
+            @if (!filmForm.value.immagine) {
             <div class="drop-zone-content text-center py-4">
               <i class="bi bi-cloud-upload display-4 mb-3"></i>
               <h5 class="text-white mb-2">Trascina qui l'immagine del film</h5>
@@ -170,9 +159,9 @@
             } @else {
             <div class="position-relative preview-container">
               <img
-                [src]="film.immagine"
+                [src]="filmForm.value.immagine"
                 class="img-fluid preview-image rounded shadow"
-                [alt]="film.titolo || 'Anteprima'"
+                [alt]="filmForm.value.titolo || 'Anteprima'"
               />
               <div class="preview-overlay">
                 <button
@@ -215,17 +204,15 @@
             class="form-control glass-input"
             id="descrizione"
             name="descrizione"
-            [(ngModel)]="film.descrizione"
-            #descrizioneInput="ngModel"
             rows="4"
             maxlength="500"
             placeholder="Descrivi la trama del film..."
-            [class.is-valid]="
-              descrizioneInput.valid && descrizioneInput.touched && film.descrizione.length > 0
-            "
+            [formControlName]="'descrizione'"
           >
           </textarea>
-          <div class="form-text text-white-50">{{ film.descrizione.length }}/500 caratteri</div>
+          <div class="form-text text-white-50">
+            {{ filmForm.value.descrizione?.length }}/500 caratteri
+          </div>
         </div>
 
         <!-- Pulsanti azione -->
@@ -255,8 +242,7 @@
           </button>
         </div>
 
-        <!-- Indicatore validazione form -->
-        @if (filmForm.submitted && filmForm.invalid) {
+        @if (filmForm.invalid && filmForm.touched) {
         <div class="form-validation-indicator mt-3">
           <div class="alert alert-danger glass-alert">
             <i class="bi bi-exclamation-triangle"></i>

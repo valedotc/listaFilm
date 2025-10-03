@@ -1,76 +1,64 @@
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { Generi, FilmInterface } from '../film/film';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, JsonPipe } from '@angular/common';
+import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { FilmService } from '../film-service';
 
 @Component({
   selector: 'app-form',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ReactiveFormsModule, JsonPipe],
   templateUrl: './form.html',
   styleUrl: './form.css',
 })
-export class Form implements OnInit {
+export class Form {
   private router = inject(Router);
+  private filmService = inject(FilmService);
+
   isDragging = false;
   fileSelected = false;
-  // Proprietà per il form
-  film = {
-    id: '',
-    titolo: '',
-    data: new Date(),
-    descrizione: '',
-    immagine: '',
-    valutazione: 5,
-    genere: '' as Generi,
-  };
 
-  dataString = ''; // Per il binding del date input
   isSubmitting = false;
-  maxDate = new Date().toISOString().split('T')[0]; // Data odierna come massimo
+  maxDate = new Date().toISOString().split('T')[0];
 
   generiDisponibili = Object.values(Generi);
 
-  // Metodi per le stelle
+  filmForm = new FormGroup({
+    id: new FormControl<string | null>(null),
+    titolo: new FormControl<string | null>(null, Validators.required),
+    data: new FormControl<string | null>(null, Validators.required),
+    descrizione: new FormControl<string | null>(null),
+    immagine: new FormControl<string | null>(null),
+    valutazione: new FormControl<number | null>(5),
+    genere: new FormControl<Generi | null>(null, Validators.required),
+  });
+
   getStars(): number[] {
     return Array(5)
       .fill(0)
       .map((_, i) => i);
   }
 
-  getFullStars(): number {
-    return Math.floor(this.film.valutazione / 2);
-  }
-
   hasHalfStar(): boolean {
-    return this.film.valutazione % 2 !== 0;
+    return (this.filmForm.value.valutazione || 0) % 2 !== 0;
   }
 
-  // Gestione immagine
-  onImageError(event: any): void {
-    event.target.style.display = 'none';
-  }
-
-  onImageLoad(): void {
-    // Immagine caricata correttamente
-  }
-
-  // Submit del form
   async onSubmit(): Promise<void> {
     if (this.isSubmitting) return;
 
     this.isSubmitting = true;
 
     try {
-      this.film.data = new Date(this.dataString);
-      this.film.id = this.generateId();
+      this.saveFilm(this.filmForm.value as FilmInterface);
 
-      // Qui dovresti salvare il film (localStorage, servizio, etc.)
-      this.saveFilm(this.film);
+      console.log('Film salvato:', this.filmForm.value);
 
-      console.log('Film salvato:', this.film);
-
-      // Redirect alla home
       await this.router.navigate(['/']);
     } catch (error) {
       console.error('Errore nel salvataggio:', error);
@@ -79,37 +67,15 @@ export class Form implements OnInit {
     }
   }
 
-  // Reset form
-  resetForm(form: any): void {
-    form.resetForm();
-    this.film = {
-      id: '',
-      titolo: '',
-      data: new Date(),
-      descrizione: '',
-      immagine: '',
-      valutazione: 5,
-      genere: '' as Generi,
-    };
+  resetForm(form: FormGroup): void {
+    form.reset();
+    this.filmForm.reset();
     this.dataString = '';
     this.fileSelected = false;
   }
 
-  // Genera ID univoco
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  }
-
-  // Lifecycle hook
-  ngOnInit(): void {
-    // Imposta la data corrente come default
-    this.dataString = new Date().toISOString().split('T')[0];
-  }
   private saveFilm(film: FilmInterface): void {
-    // Opzione 1: localStorage
-    const existingFilms = JSON.parse(localStorage.getItem('films') || '[]');
-    existingFilms.push(film);
-    localStorage.setItem('films', JSON.stringify(existingFilms));
+    this.filmService.addFilm(film);
   }
 
   @HostListener('dragover', ['$event'])
@@ -146,7 +112,7 @@ export class Form implements OnInit {
 
   private processFile(file: File): void {
     // Validation
-    const maxSize = 5 * 1024 * 1024; // 5 MB
+    const maxSize = 25 * 1024 * 1024; // 25 MB
     if (!file.type.startsWith('image/')) {
       alert('Per favore seleziona un file immagine');
       return;
@@ -158,7 +124,8 @@ export class Form implements OnInit {
 
     const reader = new FileReader();
     reader.onload = () => {
-      this.film.immagine = reader.result as string;
+      // this.filmForm.value.immagine = reader.result as string;
+      this.filmForm.controls.immagine.setValue(reader.result as string);
     };
     reader.onerror = () => {
       alert("Errore nel caricamento dell'immagine");
@@ -168,6 +135,6 @@ export class Form implements OnInit {
 
   removeImage(event: Event): void {
     event.stopPropagation();
-    this.film.immagine = '';
+    this.filmForm.controls.immagine.setValue('');
   }
 }
