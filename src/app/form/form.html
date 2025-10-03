@@ -28,7 +28,7 @@
             required
             maxlength="100"
             placeholder="Inserisci il titolo del film..."
-            [formControlName]="'titolo'"
+            formControlName="titolo"
           />
 
           @if (filmForm.controls.titolo.invalid && filmForm.controls.titolo.touched) {
