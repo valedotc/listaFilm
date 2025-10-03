@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { Generi, FilmInterface } from '../film/film';
 import { CommonModule, JsonPipe } from '@angular/common';
 import {
